@@ -1,24 +1,45 @@
-import logo from './logo.svg';
-import './App.css';
+import {useState, useRef, useEffect} from 'react'
+import ToDoList from './ToDoList';
+const {v4: uuidv4} = require('uuid');
 
 function App() {
+
+  const [todos, setTodoList]=useState([])
+  const todoNameRef=useRef();
+  const LOCALSTORAGEKEY = '1';
+  useEffect(() => {
+    const storedTodos = JSON.parse(localStorage.getItem(LOCALSTORAGEKEY))
+    if(storedTodos) setTodoList(storedTodos)
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem(LOCALSTORAGEKEY,JSON.stringify(todos))
+  }, [todos])
+
+  function handleAddTodo(){
+    const name= todoNameRef.current.value;
+    todoNameRef.current.value='';
+    console.log(name);
+    if(name ==='')return
+    console.log(name)
+    let todo = {id:uuidv4(), name:name, completed: false}
+    setTodoList(prevTodos => {
+      return [...prevTodos, todo]})
+  }  
+
+  function clearTodos(){
+    setTodoList([]);
+    localStorage.clear();
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <ToDoList todos={todos} />
+      <input ref={todoNameRef} type="text" />
+      <button onClick={handleAddTodo}>Add ToDo</button>
+      <button onClick={clearTodos}>Clear completed ToDos</button>
+      <div>{todos.length} left to do</div>
+    </>
   );
 }
 
